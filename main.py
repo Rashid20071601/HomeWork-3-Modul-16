@@ -2,43 +2,34 @@
 from fastapi import FastAPI, Path
 from typing import Annotated
 
-# Инициализация приложения
+# Создаем экземпляр приложения FastAPI
 app = FastAPI()
+users = {'1': 'Имя: Example, возраст: 18'}  # Храним пользователей в виде словаря
 
-# База данных сообщений
-messages_db = {'0': 'Первый пост в FastAPI'}
 
-# Получение всех сообщений
-@app.get('/')
-async def get_all_messages() -> dict:
-    return messages_db
+@app.get('/users')
+async def get_users() -> dict:
+    # Возвращаем список всех пользователей
+    return users
 
-# Получение сообщения по ID
-@app.get('/message/{message_id}')
-async def get_message(message_id: str) -> dict:
-    return messages_db[message_id]
 
-# Создание нового сообщения
-@app.post('/message')
-async def create_message(message: str) -> str:
-    current_index = str(int(max(messages_db, key=int)) + 1)
-    messages_db[current_index] = message
-    return 'Сообщение создано!'
+@app.post('/user/{username}/{age}')
+async def registered_user(username: str, age: int) -> str:
+    # Регистрируем нового пользователя с уникальным ID
+    current_id = str(int(max(users, key=int)) + 1)
+    users[current_id] = f'Имя: {username}, возраст: {age}'
+    return f'User {current_id} is registered!'
 
-# Обновление сообщения
-@app.put('/message/{message_id}')
-async def update_message(message_id: str, message: str) -> str:
-    messages_db[message_id] = message
-    return 'Сообщение обновлено!'
 
-# Удаление сообщения по ID
-@app.delete('/message/{message_id}')
-async def delete_message(message_id: str) -> str:
-    messages_db.pop(message_id)
-    return f'Сообщение с ID {message_id} удалено!'
+@app.put('/user/{user_id}/{username}/{age}')
+async def update_user(user_id: str, username: str, age: int) -> str:
+    # Обновляем данные существующего пользователя
+    users[user_id] = f'Имя: {username}, возраст: {age}'
+    return f'The user {user_id} is updated!'
 
-# Удаление всех сообщений
-@app.delete('/')
-async def delete_all_messages() -> str:
-    messages_db.clear()
-    return 'Все сообщения удалены!'
+
+@app.delete('/user/{user_id}')
+async def deleted_user(user_id: str) -> str:
+    # Удаляем пользователя по его ID
+    users.pop(user_id)
+    return f'The user {user_id} is deleted'
